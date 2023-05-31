@@ -12,9 +12,9 @@
 
 #define DATABASE_URL "smart-streetlight-167e7-default-rtdb.firebaseio.com"
 
-#define LDR_PIN 32
-#define RAIN_PIN 35
-#define MIST_PIN 34
+#define LDR_PIN 13
+#define RAIN_PIN 12
+#define MIST_PIN 14
 
 FirebaseData fbdo;
 FirebaseAuth auth;
