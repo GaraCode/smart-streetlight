@@ -171,11 +171,43 @@
                 update(sensorRef, {
                     condition: sensorsCond[i]
                 });
+
+                // Process streetlight
+                const streetlightRef = ref(db, 'streetlight');
+                if (sensorsCond[0] == 'senja' || sensorsCond[1] == 'gelap') {
+                    update(streetlightRef, {
+                        state: 'nyala',
+                        color: 'putih'
+                    });
+                    if (sensorsCond[2] == 'hujan sedang' || sensorsCond[3] == 'kabut sedang') {
+                        update(streetlightRef, {
+                            color: 'kuning'
+                        });
+                    } else if (sensorsCond[2] == 'hujan ringan' || sensorsCond[3] == 'kabut ringan') {
+                        update(streetlightRef, {
+                            color: 'putih'
+                        });
+                    }
+                } else if (sensorsCond[0] == 'pagi' && sensorsCond[1] == 'terang') {
+                    update(streetlightRef, {
+                        state: 'mati'
+                    });
+                    if (sensorsCond[2] == 'hujan berat' || sensorsCond[3] == 'kabut berat') {
+                        update(streetlightRef, {
+                            state: 'nyala',
+                            color: 'kuning'
+                        });
+                    } else if (sensorsCond[2] == 'hujan sedang' || sensorsCond[3] == 'kabut sedang') {
+                        update(streetlightRef, {
+                            state: 'mati'
+                        });
+                    }
+                }
             })
         }
 
         // Get Streetlight
-        const streetlightCond = ['off', 'white'];
+        const streetlightCond = ['mati', 'putih'];
         const streetlightParam = ['state', 'color'];
         for (let i = 0; i < streetlightParam.length; i++) {
             const streetlightRef = ref(db, 'streetlight/' + streetlightParam[i]);
