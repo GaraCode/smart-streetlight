@@ -183,7 +183,7 @@
                         update(streetlightRef, {
                             color: 'kuning'
                         });
-                    } else if (sensorsCond[2] == 'hujan ringan' || sensorsCond[3] == 'kabut ringan') {
+                    } else if (sensorsCond[2] == 'hujan ringan' || 'tidak hujan' && sensorsCond[3] == 'kabut ringan' || 'tidak berkabut') {
                         update(streetlightRef, {
                             color: 'putih'
                         });
@@ -197,7 +197,7 @@
                             state: 'nyala',
                             color: 'kuning'
                         });
-                    } else if (sensorsCond[2] == 'hujan sedang' || sensorsCond[3] == 'kabut sedang') {
+                    } else if (sensorsCond[2] == 'hujan sedang' || 'hujan ringan' || 'tidak hujan' && sensorsCond[3] == 'kabut sedang' || 'kabut ringan' || 'tidak berkabut') {
                         update(streetlightRef, {
                             state: 'mati'
                         });
