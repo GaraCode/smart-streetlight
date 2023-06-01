@@ -103,7 +103,14 @@
                     onValue(sensorRef, (snapshot) => {
                         sensorsVal[i] = snapshot.val();
                         const sensorValElem = document.getElementById(sensors[i] + '__value');
-                        sensorValElem.innerHTML = sensorsVal[i];
+                        switch (sensors[i]) {
+                            case 'time':
+                                sensorValElem.innerHTML = sensorsVal[i];
+                                break;
+                            default:
+                                sensorValElem.innerHTML = sensorsVal[i] + '%';
+                                break;
+                        }
                     })
                 } else if (sensorsParam[j] == 'condition') {
                     onValue(sensorRef, (snapshot) => {
@@ -129,6 +136,7 @@
                     } else if (sensors[i] == '19:00') {
                         sensorsCond[i] = 'malam';
                     }
+                    break;
             }
         }
 
