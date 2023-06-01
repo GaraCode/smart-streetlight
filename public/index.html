@@ -93,7 +93,7 @@
 
         // Get Sensors
         const sensors = ['time', 'light', 'rain', 'mist'];
-        const sensorsVal = ['00:00', '0', '0', '0'];
+        const sensorsVal = ['00:00', 0, 0, 0];
         const sensorsCond = ['pagi', 'cerah', 'tidak hujan', 'tidak berkabut'];
         const sensorsParam = ['value', 'condition'];
         for (let i = 0; i < sensors.length; i++) {
@@ -113,6 +113,23 @@
                     })
                 }
             }
+
+            switch (sensors[i]) {
+                case 'time':
+                    if (sensors[i] == '03:00') {
+                        sensorsCond[i] = 'dini hari';
+                    } else if (sensors[i] == '05:00') {
+                        sensorsCond[i] = 'pagi';
+                    } else if (sensors[i] == '11:00') {
+                        sensorsCond[i] = 'siang';
+                    } else if (sensors[i] == '15:00') {
+                        sensorsCond[i] = 'sore';
+                    } else if (sensors[i] == '18:00') {
+                        sensorsCond[i] = 'senja';
+                    } else if (sensors[i] == '19:00') {
+                        sensorsCond[i] = 'malam';
+                    }
+            }
         }
 
         // Get Streetlight
@@ -126,6 +143,8 @@
                 streetlightCondElem.innerHTML = streetlightCond[i];
             })
         }
+
+        console.log(sensorsVal);
       </script>
 </body>
 </html>
