@@ -70,7 +70,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-analytics.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
       
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -95,49 +95,83 @@
         const sensors = ['time', 'light', 'rain', 'mist'];
         const sensorsVal = ['00:00', 0, 0, 0];
         const sensorsCond = ['pagi', 'cerah', 'tidak hujan', 'tidak berkabut'];
-        const sensorsParam = ['value', 'condition'];
-        for (let i = 0; i < sensors.length; i++) {
-            for (let j = 0; j < sensorsParam.length; j++) {
-                const sensorRef = ref(db, 'sensors/' + sensors[i] + '/' + sensorsParam[j]);
-                if (sensorsParam[j] == 'value') {
-                    onValue(sensorRef, (snapshot) => {
-                        sensorsVal[i] = snapshot.val();
-                        const sensorValElem = document.getElementById(sensors[i] + '__value');
-                        switch (sensors[i]) {
-                            case 'time':
-                                sensorValElem.innerHTML = sensorsVal[i];
-                                break;
-                            default:
-                                sensorValElem.innerHTML = sensorsVal[i] + '%';
-                                break;
-                        }
-                    })
-                } else if (sensorsParam[j] == 'condition') {
-                    onValue(sensorRef, (snapshot) => {
-                        sensorsCond[i] = snapshot.val();
-                        const sensorCondElem = document.getElementById(sensors[i] + '__condition');
-                        sensorCondElem.innerHTML = sensorsCond[i];
-                    })
-                }
-            }
+        // const sensorsParam = ['value', 'condition'];
 
-            switch (sensors[i]) {
-                case 'time':
-                    if (sensors[i] == '03:00') {
-                        sensorsCond[i] = 'dini hari';
-                    } else if (sensors[i] == '05:00') {
-                        sensorsCond[i] = 'pagi';
-                    } else if (sensors[i] == '11:00') {
-                        sensorsCond[i] = 'siang';
-                    } else if (sensors[i] == '15:00') {
-                        sensorsCond[i] = 'sore';
-                    } else if (sensors[i] == '18:00') {
-                        sensorsCond[i] = 'senja';
-                    } else if (sensors[i] == '19:00') {
-                        sensorsCond[i] = 'malam';
-                    }
-                    break;
-            }
+        for (let i = 0; i < sensors.length; i++) {
+            const sensorValRef = ref(db, 'sensors/' + sensors[i] + '/value');
+            onValue(sensorValRef, (snapshot) => {
+                // Get sensors value
+                sensorsVal[i] = snapshot.val();
+                
+                // Show sensors value
+                const sensorValElem = document.getElementById(sensors[i] + '__value');
+                switch (sensors[i]) {
+                    case 'time':
+                        sensorValElem.innerHTML = sensorsVal[i];
+                        break;
+                    default:
+                        sensorValElem.innerHTML = sensorsVal[i] + '%';
+                        break;
+                }
+
+                // Compute sensors value to environmental conditions
+                switch (sensors[i]) {
+                    case 'time':
+                        if (sensorsVal[i] == '03:00') {
+                            sensorsCond[i] = 'dini hari';
+                        } else if (sensorsVal[i] == '05:00') {
+                            sensorsCond[i] = 'pagi';
+                        } else if (sensorsVal[i] == '11:00') {
+                            sensorsCond[i] = 'siang';
+                        } else if (sensorsVal[i] == '15:00') {
+                            sensorsCond[i] = 'sore';
+                        } else if (sensorsVal[i] == '18:00') {
+                            sensorsCond[i] = 'senja';
+                        } else if (sensorsVal[i] == '19:00') {
+                            sensorsCond[i] = 'malam';
+                        }
+                        break;
+                    case 'light':
+                        if (sensorsVal[i] < 20) {
+                            sensorsCond[i] = 'gelap';
+                        } else {
+                            sensorsCond[i] = 'terang';
+                        }
+                        break;
+                    case 'rain':
+                        if (sensorsVal[i] < 10) {
+                            sensorsCond[i] = 'tidak hujan';
+                        } else if (sensorsVal[i] < 40) {
+                            sensorsCond[i] = 'hujan ringan';
+                        } else if (sensorsVal[i] < 80) {
+                            sensorsCond[i] = 'hujan sedang';
+                        } else {
+                            sensorsCond[i] = 'hujan berat';
+                        }
+                        break;
+                    case 'mist':
+                        if (sensorsVal[i] < 10) {
+                            sensorsCond[i] = 'tidak berkabut';
+                        } else if (sensorsVal[i] < 40) {
+                            sensorsCond[i] = 'kabut ringan';
+                        } else if (sensorsVal[i] < 80) {
+                            sensorsCond[i] = 'kabut sedang';
+                        } else {
+                            sensorsCond[i] = 'kabut berat';
+                        }
+                        break;
+                }
+
+                // Show environmental conditions
+                const sensorCondElem = document.getElementById(sensors[i] + '__condition');
+                sensorCondElem.innerHTML = sensorsCond[i];
+
+                // Update environmental conditions
+                const sensorRef = ref(db, 'sensors/' + sensors[i]);
+                update(sensorRef, {
+                    condition: sensorsCond[i]
+                });
+            })
         }
 
         // Get Streetlight
@@ -151,8 +185,6 @@
                 streetlightCondElem.innerHTML = streetlightCond[i];
             })
         }
-
-        console.log(sensorsVal);
       </script>
 </body>
 </html>
