@@ -12,21 +12,28 @@
 
 #define DATABASE_URL "smart-streetlight-167e7-default-rtdb.firebaseio.com"
 
-#define LDR_PIN 13
-#define RAIN_PIN 12
-#define MIST_PIN 14
+#define LDR_PIN 27
+#define RAIN_PIN 26
+#define MIST_PIN 25
+
+#define RED_PIN 14
+#define GREEN_PIN 12
+#define BLUE_PIN 13
 
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
-
-unsigned long dataMillis = 0;
 
 struct tm* ptr;
 time_t t;
 
 char timeOnly[32];
 char dateOnly[32];
+
+String _state = "mati";
+String _color = "putih";
+String _tmp_state;
+String _tmp_color;
 
 int getPercen(int pin) {
   int value = analogRead(pin);
@@ -38,6 +45,32 @@ int getPercenRev(int pin) {
   int value = analogRead(pin);
   int percen = map(value, 0, 4095, 100, 0);
   return percen;
+}
+
+void setState(String state) {
+  if (state == "nyala") {
+    _tmp_state = "nyala";
+    setColor(_color);
+  } else if (state == "mati") {
+    _tmp_state = "mati";
+    analogWrite(RED_PIN, 0);
+    analogWrite(GREEN_PIN, 0);
+    analogWrite(BLUE_PIN, 0);
+  }
+}
+
+void setColor(String color) {
+  if (color == "putih") {
+    _tmp_color = "putih";
+    analogWrite(RED_PIN, 255);
+    analogWrite(GREEN_PIN, 255);
+    analogWrite(BLUE_PIN, 255);
+  } else if (color == "kuning") {
+    _tmp_color = "kuning";
+    analogWrite(RED_PIN, 255);
+    analogWrite(GREEN_PIN, 128);
+    analogWrite(BLUE_PIN, 0);
+  }
 }
 
 void setup() {
@@ -64,6 +97,12 @@ void setup() {
   pinMode(RAIN_PIN, INPUT);
   pinMode(MIST_PIN, INPUT);
 
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(BLUE_PIN, OUTPUT);
+
+  setState(_state);
+
   config.database_url = DATABASE_URL;
   config.signer.test_mode = true;
 
@@ -72,8 +111,6 @@ void setup() {
 }
 
 void loop() {
-  dataMillis = millis();
-
   t = time(NULL);
   ptr = localtime(&t);
   strftime(timeOnly, 32, "%H:%M", ptr);
@@ -116,6 +153,22 @@ void loop() {
   }
 
   Serial.println();
+  
+  Firebase.getString(fbdo, "/streetlight/state", &_state);
+  Firebase.getString(fbdo, "/streetlight/color", &_color);
+
+  if (_tmp_state == "nyala") {
+    if (_state != _tmp_state) {
+      setState(_state);
+    }
+    if (_color != _tmp_color) {
+      setColor(_color);
+    }
+  } else if (_tmp_state == "mati") {
+    if (_state != _tmp_state) {
+      setState(_state);
+    }
+  }
   
   delay(500);
 }
